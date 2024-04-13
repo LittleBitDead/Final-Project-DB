@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Control Panel</title>
+</head>
+<body>
+    <h1>Admin Control Panel</h1>
+
+    <h2>Add Product</h2>
+    <form action="/adminAdd" method="post">
+        <label for="name">Name:</label>
+        <input type="text" id="name" name="name"><br>
+        <label for="description">Description:</label>
+        <input type="text" id="description" name="description"><br>
+        <label for="stock">Stock:</label>
+        <input type="number" id="stock" name="stock"><br>
+        <label for="price">Price:</label>
+        <input type="real" id="price" name="price"><br>
+        <button type="submit" name="add_product">Add Product</button>
+    </form>
+
+    {% if P_message %}
+        <p>{{ P_message }}</p>
+    {% endif %}
+
+    <h2>Add Employee</h2>
+    <form action="/adminAdd" method="post">
+        <label for="name">Name:</label>
+        <input type="text" id="name" name="name"><br>
+        <label for="email">Email:</label>
+        <input type="email" id="email" name="email"><br>
+        <label for="password">Password:</label>
+        <input type="password" id="password" name="password"><br>
+        <label for="role_id">Role ID:</label>
+        <input type="number" id="role_id" name="role_id"><br>
+        <button type="submit" name="add_employee">Add Employee</button>
+    </form>
+
+    {% if E_message %}
+        <p>{{ E_message }}</p>
+    {% endif %}
+
+    <h2>View Transactions</h2>
+    <form action="/transactions" method="post">
+        <label for="cust_id">Customer ID:</label>
+        <input type="number" id="cust_id" name="cust_id"><br>
+        <button type="submit">Get Transactions</button>
+    </form>
+
+    {% if transactions %}
+        <h2>Transactions</h2>
+        <ul>
+            {% for transaction in transactions %}
+                <li>Transaction ID: {{ transaction[0] }} - Customer ID: {{ transaction[1] }} - Product ID: {{ transaction[2] }} - Quantity: {{ transaction[3] }} - Price: {{ transaction[4] }} - Date: {{ transaction[5] }}</li>
+            {% endfor %}
+        </ul>
+    {% endif %}
+</body>
+</html>
