@@ -1,7 +1,5 @@
-from flask import Flask, render_template, request, redirect, url_for
+from flask import Flask, render_template, request, redirect, url_for, jsonify
 import sqlite3
-
-hashingVal = 'hashing'
 
 app = Flask(__name__)
 
@@ -93,7 +91,7 @@ def login():
     if result:
         name = result[0]
         if role == '3':
-            return render_template('Control/custCtrl.html', name=name)
+            return render_template('Control/custCtrl.html', name=name, info=result)
         elif role == '2':
             return render_template('Control/empCtrl.html', name=name)
         elif role == '1':
@@ -144,6 +142,72 @@ def transactions():
     conn.close()
 
     return render_template('Control/adminCtrl.html', transactions=transactions)
+
+
+# Route to handle the form submission and charge the user
+@app.route('/charge_user', methods=['POST'])
+def charge_user():
+    customer_id = request.form['customer_id']
+    product_id = request.form['product_id']
+    quantity = request.form['quantity']
+
+    # Fetch product details from the database
+    conn = sqlite3.connect('Store.db')
+    cursor = conn.cursor()
+    cursor.execute("SELECT name, price, stock FROM Products WHERE id=?", (product_id,))
+    product = cursor.fetchone()
+
+    cursor.execute("SELECT id FROM Customers WHERE id=?", (customer_id,))
+    customer = cursor.fetchone()
+    if product and customer:
+        product_name, price, stock = product
+        if stock >= int(quantity):
+            # Calculate total price
+            total_price = price * int(quantity)
+
+            # Perform transaction
+            cursor.execute(
+                "INSERT INTO Transactions (cust_id, prod_id, quantity, price, date) VALUES (?, ?, ?, ?, date('now'))",
+                (customer_id, product_id, quantity, total_price))
+            conn.commit()
+
+            # Update stock
+            new_stock = stock - int(quantity)
+            cursor.execute("UPDATE Products SET stock=? WHERE id=?", (new_stock, product_id))
+            conn.commit()
+
+            return render_template('Control/empCtrl.html', C_message="Transaction Complete.")
+        else:
+            return render_template('Control/empCtrl.html', C_message="Out of Stock")
+    else:
+        return render_template('Control/empCtrl.html', C_message="No Product Found.")
+
+# Route to view all stock
+@app.route('/view_stock')
+def view_stock():
+    conn = sqlite3.connect('Store.db')
+    cursor = conn.cursor()
+    cursor.execute("SELECT id, name, stock FROM Products")
+    stock = cursor.fetchall()
+    stock_data = [{'id':row[0], 'name': row[1], 'stock': row[2]} for row in stock]
+    return jsonify(stock_data)
+
+@app.route('/update_customer', methods=['POST'])
+def update_customer():
+    if request.method == 'POST':
+        name = request.form['name']
+        email = request.form['email']
+        address = request.form['address']
+        password = request.form['password']
+
+        # Update the customer information in the database
+        conn = sqlite3.connect('Store.db')
+        cursor = conn.cursor()
+        cursor.execute('UPDATE Customers SET name=?, address=? WHERE email = ? and password = ?', (name, address, email, password))
+        conn.commit()
+        conn.close()
+
+        return render_template('Control/custCtrl.html', name=name)
 
 if __name__ == '__main__':
     app.run(debug=True)

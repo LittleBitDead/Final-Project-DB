@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Customer Control Panel</title>
+</head>
+<body>
+    <a href="/">Return</a>
+    <h1>Welcome {{ name }}</h1>
+    <h1>Update Your Information</h1>
+    <form action="/update_customer" method="POST">
+        <label for="name">Name:</label><br>
+        <input type="text" id="name" name="name" required><br><br>
+        <label for="address">Address:</label><br>
+        <input type="text" id="address" name="address" required><br><br>
+
+        <p>Please type email and password to verify</p>
+
+        <label for="email">Email:</label><br>
+        <input type="email" id="email" name="email" required><br><br>
+        <label for="password">Password:</label><br>
+        <input type="password" id="password" name="password"><br>
+
+        <br>
+        <input type="submit" value="Update">
+    </form>
+</body>
+</html>
